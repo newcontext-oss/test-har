@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 version = '0.1'
 
-tests_require = ['requests-mock', 'django-setuptest']
+tests_require = ['requests-mock', 'django-setuptest', 'djangorestframework']
 
 setup(name='test-har',
       version=version,
@@ -24,7 +24,7 @@ setup(name='test-har',
       ],
       tests_require=tests_require,
       extras_require=dict(tests=tests_require),
-      test_suite='test_har.tests',
+      test_suite='setuptest.setuptest.SetupTestSuite',
       entry_points="""
       # -*- Entry points: -*-
       """,
