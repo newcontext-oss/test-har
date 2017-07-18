@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 version = '0.1'
 
-tests_require = ['requests-mock']
+tests_require = ['requests-mock', 'django-setuptest']
 
 setup(name='test-har',
       version=version,
