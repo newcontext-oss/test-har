@@ -59,16 +59,18 @@ class HARTestCase(unittest.TestCase):
                 except AssertionError as exc:
                     failures['content/mimeType'] = exc
 
+            response_headers = dict(response.headers)
+            response_headers.pop('Content-Type', None)
             for header in entry["response"].get("headers", []):
                 try:
                     self.assertIn(
-                        header['name'], response.headers,
+                        header['name'], response_headers,
                         'Missing response header {0!r}'.format(
                             header['name']))
                     self.assertEqual(
-                        response.headers[header['name']], header['value'],
+                        response_headers[header['name']], header['value'],
                         'Wrong response header {0!r} value: {1!r}'.format(
-                            header['name'], response.headers[header['name']]))
+                            header['name'], response_headers[header['name']]))
                 except AssertionError as exc:
                     failures['headers/{0}'.format(header['name'])] = exc
 
