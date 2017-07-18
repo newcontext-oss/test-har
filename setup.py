@@ -2,6 +2,8 @@ from setuptools import setup, find_packages
 
 version = '0.1'
 
+tests_require = ['requests-mock']
+
 setup(name='test-har',
       version=version,
       description="Use HTTP Archive (HAR) files in Python tests",
@@ -20,6 +22,8 @@ setup(name='test-har',
       install_requires=[
           # -*- Extra requirements: -*-
       ],
+      tests_require=tests_require,
+      extras_require=dict(tests=tests_require),
       test_suite='test_har.tests',
       entry_points="""
       # -*- Entry points: -*-
