@@ -24,13 +24,14 @@ class HARTestCase(unittest.TestCase):
         Send requests in the HAR and make assertions on the HAR responses.
         """
         responses = []
-        failures = {}
         for entry in har["log"]["entries"]:
             headers = array_to_dict(entry["request"].get("headers", []))
 
             response = self._request_har(
                 method=entry["request"]["method"],
                 url=entry["request"]["url"], headers=headers)
+            responses.append(response)
+            failures = {}
 
             try:
                 self.assertEqual(
@@ -91,9 +92,7 @@ class HARTestCase(unittest.TestCase):
             except AssertionError as exc:
                 failures['content/text'] = exc
 
-            responses.append(response)
-
-        if failures:
-            self.fail(failures)
+            if failures:
+                self.fail(failures)
 
         return responses
