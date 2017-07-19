@@ -12,6 +12,19 @@ def array_to_dict(array, key='name', value='value'):
     return {item[key]: item[value] for item in array}
 
 
+class HAREntryAssertionError(AssertionError):
+    """
+    Collect multiple failures for a single entries response.
+    """
+
+    def __init__(self, response, *args):
+        """
+        Record the response corresponding to the failures.
+        """
+        self.response = response
+        super(HAREntryAssertionError, self).__init__(*args)
+
+
 class HARTestCase(unittest.TestCase):
     """
     Run tests using HTTP Archive (HAR) files.
@@ -93,6 +106,6 @@ class HARTestCase(unittest.TestCase):
                 failures['content/text'] = exc
 
             if failures:
-                self.fail(failures)
+                raise HAREntryAssertionError(response, failures)
 
         return responses

@@ -4,6 +4,7 @@ Test using HAR files in Python tests against the requests library.
 
 import json
 
+import requests
 import requests_mock
 
 from test_har import requests_har as test_har
@@ -14,6 +15,8 @@ class HARDogfoodRequestsTests(tests.HARDogfoodTestCase, test_har.HARTestCase):
     """
     Test using HAR files in Python tests against the requests library.
     """
+
+    RESPONSE_TYPE = requests.Response
 
     def setUp(self):
         """

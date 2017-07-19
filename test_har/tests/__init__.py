@@ -16,6 +16,9 @@ class HARDogfoodTestCase(object):
     Tests common to all backends.
     """
 
+    # Subclasses must define
+    # RESPONSE_TYPE = ...
+
     def setUp(self):
         """
         Load an example HAR file.
@@ -74,6 +77,14 @@ class HARDogfoodTestCase(object):
 
         with self.assertRaises(AssertionError) as har_failures:
             self.assertHAR(self.example)
+
+        self.assertIn(
+            'response', dir(har_failures.exception),
+            'Failure missing reference to the response')
+        self.assertIsInstance(
+            har_failures.exception.response, self.RESPONSE_TYPE,
+            'Failure response is wrong type: {0}'.format(
+                type(har_failures.exception.response)))
 
         # Confirm that the failures gathered are the same as the exceptions
         # would be raised if we'd specified them in the test.
