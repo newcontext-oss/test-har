@@ -32,6 +32,27 @@ class HARTestCase(unittest.TestCase):
 
     JSON_MIME_TYPE_RE = JSON_MIME_TYPE_RE
 
+    def get_reason(self, response):
+        """
+        Lookup the implementation-specific response reason phrase.
+        """
+        raise NotImplementedError(  # pragma: no cover
+            'Subclasses must override `get_reason`')
+
+    def get_headers(self, req_or_resp):
+        """
+        Lookup the implementation-specific headers on a request or response.
+        """
+        raise NotImplementedError(  # pragma: no cover
+            'Subclasses must override `get_headers`')
+
+    def get_text(self, response):
+        """
+        Lookup the implementation-specific response body text.
+        """
+        raise NotImplementedError(  # pragma: no cover
+            'Subclasses must override `get_text`')
+
     def assertHAR(self, har):
         """
         Send requests in the HAR and make assertions on the HAR responses.
@@ -54,6 +75,10 @@ class HARTestCase(unittest.TestCase):
             responses.append(response)
             failures = {}
 
+            reason = self.get_reason(response)
+            response_headers = self.get_headers(response)
+            text = self.get_text(response)
+
             try:
                 self.assertEqual(
                     response.status_code, entry["response"]["status"],
@@ -72,17 +97,15 @@ class HARTestCase(unittest.TestCase):
             if content_type:
                 try:
                     self.assertIn(
-                        'Content-Type', response.headers,
+                        'Content-Type', response_headers,
                         'Response missing MIME type')
                     self.assertEqual(
-                        response.headers['Content-Type'],
+                        response_headers['Content-Type'],
                         entry["response"]["content"]["mimeType"],
                         'Wrong response MIME type')
                 except AssertionError as exc:
                     failures['content/mimeType'] = exc
 
-            response_headers = dict(response.headers)
-            response_headers.pop('Content-Type', None)
             for header in entry["response"].get("headers", []):
                 try:
                     self.assertIn(
@@ -99,13 +122,13 @@ class HARTestCase(unittest.TestCase):
             try:
                 if (
                         self.JSON_MIME_TYPE_RE.match(
-                            response.headers['Content-Type']) is not None and
+                            response_headers['Content-Type']) is not None and
                         not isinstance(
                             entry["response"]["content"]["text"], str)):
                     # Support including JSON in the HAR content text
                     content = response.json()
                 else:
-                    content = response.text
+                    content = text
 
                 self.assertEqual(
                     content, entry["response"]["content"]["text"],

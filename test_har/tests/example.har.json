@@ -5,17 +5,17 @@
       {
         "request": {
           "method": "POST",
-          "url": "mock://example.com/articles",
+          "url": "mock://example.com/users/",
           "headers" : [
             {
-              "name": "Content-Type",
+              "name": "Accept",
               "value": "application/json"
             }
           ],
           "postData": {
             "mimeType": "application/json",
             "text" : {
-              "title": "Foo"
+              "username": "foo_username"
             }
           },
           "comment" : "Test validation errors"
@@ -25,18 +25,18 @@
           "statusText": "Created",
           "headers" : [
             {
-              "name": "Foo",
-              "value": "bar"
+              "name": "Allow",
+              "value": "GET, POST, HEAD, OPTIONS"
             },
             {
-              "name": "Qux",
-              "value": "baz"
+              "name": "Vary",
+              "value": "Accept, Cookie"
             }
           ],
           "content": {
             "mimeType": "application/json",
             "text": {
-              "title": "Foo"
+              "username": "foo_username"
             }
           }
         }

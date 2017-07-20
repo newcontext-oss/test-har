@@ -41,19 +41,20 @@ class HARDogfoodTestCase(object):
             response.status_code, self.entry["response"]["status"],
             'Wrong response status')
         self.assertEqual(
-            response.reason, self.entry["response"]["statusText"],
+            self.get_reason(response), self.entry["response"]["statusText"],
             'Wrong response status text')
         self.assertEqual(
-            response.headers['Content-Type'],
+            self.get_headers(response)['Content-Type'],
             self.entry["response"]["content"]["mimeType"],
             'Wrong response MIME type')
 
+        har_headers = test_har.array_to_dict(
+            self.entry["response"]["headers"])
         response_headers = {
-            key: value for key, value in response.headers.items()
-            if key != 'Content-Type'}
+            key: value for key, value in self.get_headers(response).items()
+            if key in har_headers}
         self.assertEqual(
-            response_headers,
-            test_har.array_to_dict(self.entry["response"]["headers"]),
+            response_headers, har_headers,
             'Wrong response headers')
 
     def test_failure(self):
@@ -68,12 +69,12 @@ class HARDogfoodTestCase(object):
 
         # Moddify the HAR from which the assertions will be generated to
         # create assertion failures
-        self.entry["response"]["status"] = 200
-        self.entry["response"]["statusText"] = "OK"
+        self.entry["response"]["status"] = 400
+        self.entry["response"]["statusText"] = "Bad Request"
         self.entry["response"]["headers"][0]["value"] = "foo"
         self.entry["response"]["headers"][1]["name"] = "Corge"
         self.entry["response"]["content"]["mimeType"] = "text/plain"
-        self.entry["response"]["content"]["text"] = 'Foo plain text body'
+        self.entry["response"]["content"]["text"] = 'Bar plain text body'
 
         with self.assertRaises(AssertionError) as har_failures:
             self.assertHAR(self.example)
@@ -129,16 +130,18 @@ class HARDogfoodTestCase(object):
             'Wrong response MIME type failure assertion')
 
         self.assertIn(
-            'headers/Foo', har_failures.exception.args[0],
+            'headers/Allow', har_failures.exception.args[0],
             'Assertion exception missing wrong header detail')
         with self.assertRaises(AssertionError) as expected:
             self.assertEqual(
-                pass_headers["Foo"],
+                pass_headers["Allow"],
                 self.entry["response"]["headers"][0]["value"],
                 "Wrong response header {0!r} value: {1!r}".format(
-                    'Foo', pass_headers["Foo"]))
+                    'Allow', type(self.get_headers(
+                        har_failures.exception.response)['Allow']
+                    )(pass_headers["Allow"])))
         self.assertEqual(
-            har_failures.exception.args[0]['headers/Foo'].args,
+            har_failures.exception.args[0]['headers/Allow'].args,
             expected.exception.args,
             'Wrong response header value failure assertion')
 
@@ -147,7 +150,7 @@ class HARDogfoodTestCase(object):
             'Assertion exception missing absent header detail')
         with self.assertRaises(AssertionError) as expected:
             self.assertIn(
-                'Corge', pass_headers,
+                'Corge', self.get_headers(har_failures.exception.response),
                 'Missing response header {0!r}'.format('Corge'))
         self.assertEqual(
             har_failures.exception.args[0]['headers/Corge'].args,
@@ -171,7 +174,11 @@ class HARDogfoodTestCase(object):
         """
         Test when the response isn't JSON.
         """
+        self.entry["request"]["headers"][0]["value"] = "text/plain"
+        self.entry["response"]["content"]["mimeType"] = "text/plain"
+        self.entry["response"]["content"]["text"] = 'Foo plain text body'
         response = self.assertHAR(self.example)[0]
         self.assertEqual(
-            response.text, self.entry["response"]["content"]["text"],
+            response.content.decode(),
+            self.entry["response"]["content"]["text"],
             'Wrong non-JSON response body')

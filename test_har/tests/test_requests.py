@@ -39,12 +39,6 @@ class HARDogfoodRequestsTests(tests.HARDogfoodTestCase, test_har.HARTestCase):
             headers=self.headers,
             text=json.dumps(self.entry["response"]["content"]["text"]))
 
-    def test_runner(self):
-        """
-        Ensure tests are running.
-        """
-        self.assertTrue(True)
-
     def test_non_json(self):
         """
         Mock the requests library non-JSON response.
