@@ -88,7 +88,9 @@ class HARTestCase(unittest.TestCase):
 
             try:
                 self.assertEqual(
-                    reason, entry["response"]["statusText"],
+                    reason,
+                    # BBB Python 2.7 str vs unicode compat
+                    type(reason)(entry["response"]["statusText"]),
                     'Wrong response status reason')
             except AssertionError as exc:
                 failures['statusText'] = exc
@@ -101,7 +103,9 @@ class HARTestCase(unittest.TestCase):
                         'Response missing MIME type')
                     self.assertEqual(
                         response_headers['Content-Type'],
-                        entry["response"]["content"]["mimeType"],
+                        # BBB Python 2.7 str vs unicode compat
+                        type(response_headers['Content-Type'])(
+                            entry["response"]["content"]["mimeType"]),
                         'Wrong response MIME type')
                 except AssertionError as exc:
                     failures['content/mimeType'] = exc
@@ -110,12 +114,14 @@ class HARTestCase(unittest.TestCase):
                 try:
                     self.assertIn(
                         header['name'], response_headers,
-                        'Missing response header {0!r}'.format(
-                            header['name']))
+                        'Missing response header')
                     self.assertEqual(
-                        response_headers[header['name']], header['value'],
-                        'Wrong response header {0!r} value: {1!r}'.format(
-                            header['name'], response_headers[header['name']]))
+                        response_headers[header['name']],
+                        # BBB Python 2.7 str vs unicode compat
+                        type(response_headers[header['name']])(
+                            header['value']),
+                        'Wrong response header {0!r} value'.format(
+                            header['name']))
                 except AssertionError as exc:
                     failures['headers/{0}'.format(header['name'])] = exc
 
