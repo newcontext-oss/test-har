@@ -39,10 +39,18 @@ class HARTestCase(unittest.TestCase):
         responses = []
         for entry in har["log"]["entries"]:
             headers = array_to_dict(entry["request"].get("headers", []))
-
-            response = self._request_har(
+            request = dict(
                 method=entry["request"]["method"],
-                url=entry["request"]["url"], headers=headers)
+                url=entry["request"]["url"],
+                headers=headers)
+
+            post = entry["request"].get('postData')
+            if post is not None:
+                headers['Content-Type'] = post["mimeType"]
+                request['data'] = post["text"]
+
+            response = self.request_har(
+                **request)
             responses.append(response)
             failures = {}
 
@@ -55,7 +63,7 @@ class HARTestCase(unittest.TestCase):
 
             try:
                 self.assertEqual(
-                    response.reason, entry["response"]["statusText"],
+                    reason, entry["response"]["statusText"],
                     'Wrong response status reason')
             except AssertionError as exc:
                 failures['statusText'] = exc
