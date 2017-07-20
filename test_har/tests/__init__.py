@@ -162,7 +162,7 @@ class HARDogfoodTestCase(object):
             'Assertion exception missing wrong content text detail')
         with self.assertRaises(AssertionError) as expected:
             self.assertEqual(
-                json.dumps(pass_entry["response"]["content"]["text"]),
+                pass_entry["response"]["content"]["text"],
                 self.entry["response"]["content"]["text"],
                 'Wrong response content text')
         self.assertEqual(

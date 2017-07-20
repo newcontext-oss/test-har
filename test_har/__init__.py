@@ -120,11 +120,8 @@ class HARTestCase(unittest.TestCase):
                     failures['headers/{0}'.format(header['name'])] = exc
 
             try:
-                if (
-                        self.JSON_MIME_TYPE_RE.match(
-                            response_headers['Content-Type']) is not None and
-                        not isinstance(
-                            entry["response"]["content"]["text"], str)):
+                if self.JSON_MIME_TYPE_RE.match(
+                        response_headers['Content-Type']) is not None:
                     # Support including JSON in the HAR content text
                     content = response.json()
                 else:
