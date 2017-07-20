@@ -1,4 +1,5 @@
 import re
+import collections
 import unittest
 
 
@@ -70,10 +71,9 @@ class HARTestCase(unittest.TestCase):
                 headers['Content-Type'] = post["mimeType"]
                 request['data'] = post["text"]
 
-            response = self.request_har(
-                **request)
+            response = self.request_har(**request)
             responses.append(response)
-            failures = {}
+            failures = collections.OrderedDict()
 
             reason = self.get_reason(response)
             response_headers = self.get_headers(response)
