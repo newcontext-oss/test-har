@@ -1,3 +1,5 @@
+import json
+
 from rest_framework import test
 
 import test_har
@@ -13,6 +15,13 @@ class HARDRFTestCase(test.APITestCase, test_har.HARTestCase):
         """
         Send the request using the Django ReST Framework.
         """
+        content_type = kwargs.get('headers', {}).get('Content-Type')
+        if content_type is not None:
+            kwargs['content_type'] = content_type
+
+        if self.JSON_MIME_TYPE_RE.match(content_type) is not None:
+            data = json.dumps(data)
+
         request_method = getattr(self.client, method.lower())
         response = request_method(url, data=data, **kwargs)
         return response
