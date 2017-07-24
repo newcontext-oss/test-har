@@ -75,8 +75,9 @@ class HARDogfoodTestCase(object):
         self.entry["response"]["statusText"] = "Bad Request"
         self.entry["response"]["headers"][0]["value"] = "foo"
         self.entry["response"]["headers"][1]["name"] = "Corge"
-        self.entry["response"]["content"]["mimeType"] = "text/plain"
-        self.entry["response"]["content"]["text"] = 'Bar plain text body'
+        self.entry["response"]["content"]["mimeType"] = "text/html"
+        self.entry["response"]["content"]["text"] = (
+            '<html><body>Bar HTML body</body></html>')
 
         with self.assertRaises(AssertionError) as har_failures:
             self.assertHAR(self.example)
@@ -180,9 +181,10 @@ class HARDogfoodTestCase(object):
         """
         Test when the response isn't JSON.
         """
-        self.entry["request"]["headers"][0]["value"] = "text/plain"
-        self.entry["response"]["content"]["mimeType"] = "text/plain"
-        self.entry["response"]["content"]["text"] = 'Foo plain text body'
+        self.entry["request"]["headers"][0]["value"] = "text/html"
+        self.entry["response"]["content"]["mimeType"] = "text/html"
+        self.entry["response"]["content"]["text"] = (
+            '<html><body>Foo HTML body</body></html>')
         response = self.assertHAR(self.example)[0]
         self.assertEqual(
             response.content.decode(),

@@ -43,8 +43,9 @@ class HARDogfoodRequestsTests(tests.HARDogfoodTestCase, test_har.HARTestCase):
         """
         Mock the requests library non-JSON response.
         """
-        self.entry["response"]["content"]["mimeType"] = "text/plain"
-        self.entry["response"]["content"]["text"] = 'Foo plain text body'
+        self.entry["response"]["content"]["mimeType"] = "text/html"
+        self.entry["response"]["content"]["text"] = (
+            '<html><body>Foo HTML body</body></html>')
         self.mocker.post(
             self.entry["request"]["url"],
             status_code=self.entry["response"]["status"],

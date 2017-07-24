@@ -15,12 +15,17 @@ class HARDRFTestCase(test.APITestCase, test_har.HARTestCase):
         """
         Send the request using the Django ReST Framework.
         """
-        content_type = kwargs.get('headers', {}).get('Content-Type')
+        headers = kwargs.pop('headers', {})
+
+        content_type = headers.pop('Content-Type', None)
         if content_type is not None:
             kwargs['content_type'] = content_type
-
         if self.JSON_MIME_TYPE_RE.match(content_type) is not None:
             data = json.dumps(data)
+
+        kwargs.update(
+            ('HTTP_{0}'.format(key.upper()), value)
+            for key, value in headers.items())
 
         request_method = getattr(self.client, method.lower())
         response = request_method(url, data=data, **kwargs)

@@ -18,10 +18,11 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         Support returning non-JSON.
         """
-        if 'json' not in request.META['headers']['Accept']:
+        if 'json' not in request.META['HTTP_ACCEPT']:
             # Return the original POST data
             return http.HttpResponse(
-                'Foo plain text body', status=status.HTTP_201_CREATED,
-                content_type='text/plain')
+                '<html><body>Foo HTML body</body></html>',
+                status=status.HTTP_201_CREATED,
+                content_type='text/html')
 
         return super(UserViewSet, self).create(request, *args, **kwargs)
