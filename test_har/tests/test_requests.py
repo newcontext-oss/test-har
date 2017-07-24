@@ -53,3 +53,32 @@ class HARDogfoodRequestsTests(tests.HARDogfoodTestCase, test_har.HARTestCase):
                 "response"]["content"]["mimeType"]}),
             text=self.entry["response"]["content"]["text"])
         super(HARDogfoodRequestsTests, self).test_non_json()
+
+    def test_missing_content_type(self):
+        """
+        Fail when the response is missing the content/MIME type.
+        """
+        self.headers.pop('Content-Type')
+        self.mocker.post(
+            self.entry["request"]["url"],
+            status_code=self.entry["response"]["status"],
+            reason=self.entry["response"]["statusText"],
+            headers=self.headers,
+            text=json.dumps(self.entry["response"]["content"]["text"]))
+
+        with self.assertRaises(AssertionError) as har_failures:
+            self.assertHAR(self.example)
+
+        self.assertIn(
+            'content/mimeType', har_failures.exception.args[0],
+            'Assertion exception missing MIME type detail')
+        # BBB Python 2.7 str vs unicode compat
+        response_headers = self.get_headers(har_failures.exception.response)
+        with self.assertRaises(AssertionError) as expected:
+            self.assertIn(
+                'Content-Type', response_headers,
+                'Missing response content type')
+        self.assertEqual(
+            har_failures.exception.args[0]['content/mimeType'].args,
+            expected.exception.args,
+            'Wrong missing response MIME type failure assertion')

@@ -79,18 +79,21 @@ class HARTestCase(unittest.TestCase):
             response_headers = self.get_headers(response)
             text = self.get_text(response)
 
+            response_status = response.status_code
+            expected_status = entry["response"]["status"]
             try:
                 self.assertEqual(
-                    response.status_code, entry["response"]["status"],
+                    response_status, expected_status,
                     'Wrong response status code')
             except AssertionError as exc:
                 failures['status'] = exc
 
+            # BBB Python 2.7 str vs unicode compat
+            expected_reason = type(reason)(entry["response"]["statusText"])
             try:
                 self.assertEqual(
                     reason,
-                    # BBB Python 2.7 str vs unicode compat
-                    type(reason)(entry["response"]["statusText"]),
+                    expected_reason,
                     'Wrong response status reason')
             except AssertionError as exc:
                 failures['statusText'] = exc
@@ -100,41 +103,54 @@ class HARTestCase(unittest.TestCase):
                 try:
                     self.assertIn(
                         'Content-Type', response_headers,
-                        'Response missing MIME type')
-                    self.assertEqual(
-                        response_headers['Content-Type'],
-                        # BBB Python 2.7 str vs unicode compat
-                        type(response_headers['Content-Type'])(
-                            entry["response"]["content"]["mimeType"]),
-                        'Wrong response MIME type')
+                        'Missing response content type')
                 except AssertionError as exc:
                     failures['content/mimeType'] = exc
+                else:
+                    expected_content_type = type(
+                        response_headers['Content-Type'])(
+                            entry["response"]["content"]["mimeType"])
+                    try:
+                        self.assertEqual(
+                            response_headers['Content-Type'],
+                            # BBB Python 2.7 str vs unicode compat
+                            expected_content_type,
+                            'Wrong response MIME type')
+                    except AssertionError as exc:
+                        failures['content/mimeType'] = exc
 
             for header in entry["response"].get("headers", []):
+                header_name = header['name']
+                # BBB Python 2.7 str vs unicode compat
                 try:
                     self.assertIn(
-                        header['name'], response_headers,
+                        header_name, response_headers,
                         'Missing response header')
-                    self.assertEqual(
-                        response_headers[header['name']],
-                        # BBB Python 2.7 str vs unicode compat
-                        type(response_headers[header['name']])(
-                            header['value']),
-                        'Wrong response header {0!r} value'.format(
-                            header['name']))
                 except AssertionError as exc:
-                    failures['headers/{0}'.format(header['name'])] = exc
+                    failures['headers/{0}'.format(header_name)] = exc
+                else:
+                    expected_header_value = type(
+                        response_headers[header_name])(header['value'])
+                    try:
+                        self.assertEqual(
+                            response_headers[header_name],
+                            expected_header_value,
+                            'Wrong response header {0!r} value'.format(
+                                header_name))
+                    except AssertionError as exc:
+                        failures['headers/{0}'.format(header_name)] = exc
+
+            expected_content = entry["response"]["content"]["text"]
+            if self.JSON_MIME_TYPE_RE.match(
+                    response_headers.get('Content-Type', '')) is not None:
+                # Support including JSON in the HAR content text
+                content = response.json()
+            else:
+                content = text
 
             try:
-                if self.JSON_MIME_TYPE_RE.match(
-                        response_headers['Content-Type']) is not None:
-                    # Support including JSON in the HAR content text
-                    content = response.json()
-                else:
-                    content = text
-
                 self.assertEqual(
-                    content, entry["response"]["content"]["text"],
+                    content, expected_content,
                     'Wrong response content text')
             except AssertionError as exc:
                 failures['content/text'] = exc
