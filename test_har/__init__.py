@@ -48,14 +48,22 @@ class HARTestCase(unittest.TestCase):
         """
         Load an example HAR file.
         """
+        super(HARTestCase, self).setUp()
+
         if self.example_har is not None:
-            with open(os.path.join(
-                    os.path.dirname(inspect.getfile(type(self))),
-                    self.example_har)
-            ) as example_file:
-                self.example = json.load(example_file)
-            self.entry = self.example["log"]["entries"][0]
-            self.headers = array_to_dict(self.entry["response"]["headers"])
+            self.setUpHAR(self.example_har)
+
+    def setUpHAR(self, example_har):
+        """
+        Load an example HAR file.
+        """
+        with open(os.path.join(
+                os.path.dirname(inspect.getfile(type(self))),
+                example_har)
+        ) as example_file:
+            self.example = json.load(example_file)
+        self.entry = self.example["log"]["entries"][0]
+        self.headers = array_to_dict(self.entry["response"]["headers"])
 
     def get_reason(self, response):
         """
