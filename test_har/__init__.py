@@ -2,6 +2,12 @@ import re
 import collections
 import unittest
 
+try:
+    import collections.abc as collections_abc
+except ImportError:  # pragma: no cover
+    # BBB Python 2 compat
+    import collections as collections_abc  # noqa
+
 
 JSON_MIME_TYPE_RE = re.compile(r'application/([^/+]+\+)?json')
 
@@ -145,15 +151,35 @@ class HARTestCase(unittest.TestCase):
                     response_headers.get('Content-Type', '')) is not None:
                 # Support including JSON in the HAR content text
                 content = response.json()
+                if (
+                        isinstance(content, collections_abc.Mapping) and
+                        isinstance(expected_content, collections_abc.Mapping)):
+                    for key, value in expected_content.items():
+                        try:
+                            self.assertIn(key, content, 'Missing content key')
+                        except AssertionError as exc:
+                            failures['content/{0}'.format(key)] = exc
+                        else:
+                            try:
+                                self.assertEqual(
+                                    content[key], value,
+                                    'Wrong content {0!r} value'.format(key))
+                            except AssertionError as exc:
+                                failures['content/{0}'.format(key)] = exc
+                else:
+                    try:
+                        self.assertEqual(
+                            content, expected_content,
+                            'Mismatched response content type')
+                    except AssertionError as exc:
+                        failures['content/text'] = exc
             else:
-                content = text
-
-            try:
-                self.assertEqual(
-                    content, expected_content,
-                    'Wrong response content text')
-            except AssertionError as exc:
-                failures['content/text'] = exc
+                try:
+                    self.assertEqual(
+                        text, expected_content,
+                        'Wrong response content text')
+                except AssertionError as exc:
+                    failures['content/text'] = exc
 
             if failures:
                 raise HAREntryAssertionError(response, failures)

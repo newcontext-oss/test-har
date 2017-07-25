@@ -59,6 +59,10 @@ class HARDogfoodTestCase(object):
             response_headers, har_headers,
             'Wrong response headers')
 
+        self.assertIn(
+            'email', response.json(),
+            'Response JSON missing ignored key')
+
     def test_failure(self):
         """
         Test when the response fails to match.
@@ -66,6 +70,8 @@ class HARDogfoodTestCase(object):
         # Capture the original values as what should be returned by the
         # backend/implementation being tested
         pass_entry = copy.deepcopy(self.entry)
+        pass_entry["response"]["content"]["text"]["email"] = self.entry[
+            "request"]["postData"]["text"]["email"]
         pass_headers = test_har.array_to_dict(
             pass_entry["response"]["headers"])
 
@@ -171,11 +177,59 @@ class HARDogfoodTestCase(object):
             self.assertEqual(
                 pass_entry["response"]["content"]["text"],
                 self.entry["response"]["content"]["text"],
-                'Wrong response content text')
+                'Mismatched response content type')
         self.assertEqual(
             har_failures.exception.args[0]['content/text'].args,
             expected.exception.args,
             'Wrong response content text failure assertion')
+
+    def test_mapping_response_failure(self):
+        """
+        Keys missing from the JSON keys are not failures.
+
+        For JSON HAR response assertions and JSON responses being tested, keys
+        in the response being tested that aren't in the HAR response are not a
+        failure.  IOW, the test ignores keys not in the assertion represented
+        by the HAR.
+        """
+        # Capture the original values as what should be returned by the
+        # backend/implementation being tested
+        pass_entry = copy.deepcopy(self.entry)
+        pass_entry["response"]["content"]["text"]["email"] = self.entry[
+            "request"]["postData"]["text"]["email"]
+
+        # Moddify the HAR from which the assertions will be generated to
+        # create assertion failures
+        self.entry["response"]["content"]["text"]["username"] = "bar_username"
+        self.entry["response"]["content"]["text"]["first_name"] = "Foo"
+
+        with self.assertRaises(AssertionError) as har_failures:
+            self.assertHAR(self.example)
+
+        self.assertIn(
+            'content/first_name', har_failures.exception.args[0],
+            'Missing failure for missing content key')
+        with self.assertRaises(AssertionError) as expected:
+            self.assertIn(
+                'first_name', pass_entry["response"]["content"]["text"],
+                'Missing content key')
+        self.assertEqual(
+            har_failures.exception.args[0]['content/first_name'].args,
+            expected.exception.args,
+            'Wrong response content missing key failure assertion')
+
+        self.assertIn(
+            'content/username', har_failures.exception.args[0],
+            'Missing failure for wrong content value')
+        with self.assertRaises(AssertionError) as expected:
+            self.assertEqual(
+                pass_entry["response"]["content"]["text"]["username"],
+                self.entry["response"]["content"]["text"]["username"],
+                'Wrong content {0!r} value'.format('username'))
+        self.assertEqual(
+            har_failures.exception.args[0]['content/username'].args,
+            expected.exception.args,
+            'Wrong response content wrong value failure assertion')
 
     def test_non_json(self):
         """

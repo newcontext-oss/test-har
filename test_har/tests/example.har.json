@@ -15,7 +15,8 @@
           "postData": {
             "mimeType": "application/json",
             "text" : {
-              "username": "foo_username"
+              "username": "foo_username",
+              "email": "foo@example.com"
             }
           },
           "comment" : "Test validation errors"
