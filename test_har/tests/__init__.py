@@ -4,8 +4,6 @@ Test using HAR files in Python tests.
 
 from __future__ import unicode_literals
 
-import os
-import json
 import copy
 
 import test_har
@@ -18,20 +16,10 @@ class HARDogfoodTestCase(object):
 
     longMessage = True
 
+    example_har = 'example.har.json'
+
     # Subclasses must define
     # RESPONSE_TYPE = ...
-
-    def setUp(self):
-        """
-        Load an example HAR file.
-        """
-        with open(os.path.join(
-                os.path.dirname(__file__), 'example.har.json')
-        ) as example_file:
-            self.example = json.load(example_file)
-        self.entry = self.example["log"]["entries"][0]
-        self.headers = test_har.array_to_dict(
-                    self.entry["response"]["headers"])
 
     def test_success(self):
         """

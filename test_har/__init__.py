@@ -1,5 +1,8 @@
+import os
 import re
 import collections
+import json
+import inspect
 import unittest
 
 try:
@@ -38,6 +41,21 @@ class HARTestCase(unittest.TestCase):
     """
 
     JSON_MIME_TYPE_RE = JSON_MIME_TYPE_RE
+
+    example_har = None
+
+    def setUp(self):
+        """
+        Load an example HAR file.
+        """
+        if self.example_har is not None:
+            with open(os.path.join(
+                    os.path.dirname(inspect.getfile(type(self))),
+                    self.example_har)
+            ) as example_file:
+                self.example = json.load(example_file)
+            self.entry = self.example["log"]["entries"][0]
+            self.headers = array_to_dict(self.entry["response"]["headers"])
 
     def get_reason(self, response):
         """
