@@ -63,7 +63,8 @@ class HARTestCase(unittest.TestCase):
         ) as example_file:
             self.example = json.load(example_file)
         self.entry = self.example["log"]["entries"][0]
-        self.headers = array_to_dict(self.entry["response"]["headers"])
+        self.headers = array_to_dict(
+            self.entry["response"].get("headers", []))
 
     def get_reason(self, response):
         """

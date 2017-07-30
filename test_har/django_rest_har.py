@@ -20,8 +20,8 @@ class HARDRFTestCase(test.APITestCase, test_har.HARTestCase):
         content_type = headers.pop('Content-Type', None)
         if content_type is not None:
             kwargs['content_type'] = content_type
-        if self.JSON_MIME_TYPE_RE.match(content_type) is not None:
-            data = json.dumps(data)
+            if self.JSON_MIME_TYPE_RE.match(content_type) is not None:
+                data = json.dumps(data)
 
         kwargs.update(
             ('HTTP_{0}'.format(key.upper()), value)
