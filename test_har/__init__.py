@@ -65,6 +65,7 @@ class HARTestCase(unittest.TestCase):
         self.entry = self.example["log"]["entries"][0]
         self.headers = array_to_dict(
             self.entry["response"].get("headers", []))
+        self.content = self.entry["response"]["content"]["text"]
 
     def get_reason(self, response):
         """
