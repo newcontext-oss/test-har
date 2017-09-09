@@ -1,3 +1,5 @@
+import os
+
 from setuptools import setup, find_packages
 
 version = '0.1'
@@ -7,8 +9,8 @@ tests_require = ['requests-mock', 'django-setuptest', 'djangorestframework']
 setup(name='test-har',
       version=version,
       description="Use HTTP Archive (HAR) files in Python tests",
-      long_description="""\
-""",
+      long_description=open(os.path.join(
+          os.path.dirname(__file__), 'README.rst')).read(),
       # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       classifiers=[],
       keywords='testing test har',
