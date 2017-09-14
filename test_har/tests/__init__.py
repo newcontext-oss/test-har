@@ -87,7 +87,7 @@ class HARDogfoodTestCase(object):
         # would be raised if we'd specified them in the test.
 
         self.assertIn(
-            'status', har_failures.exception.args[0],
+            'status', har_failures.exception.failures,
             'Assertion exception missing status code detail')
         with self.assertRaises(AssertionError) as expected:
             self.assertEqual(
@@ -95,12 +95,12 @@ class HARDogfoodTestCase(object):
                 self.entry["response"]["status"],
                 'Wrong response status code')
         self.assertEqual(
-            har_failures.exception.args[0]['status'].args,
+            har_failures.exception.failures['status'].args,
             expected.exception.args,
             'Wrong response status code failure assertion')
 
         self.assertIn(
-            'statusText', har_failures.exception.args[0],
+            'statusText', har_failures.exception.failures,
             'Assertion exception missing status text detail')
         # BBB Python 2.7 str vs unicode compat
         reason_type = type(self.get_reason(har_failures.exception.response))
@@ -110,12 +110,12 @@ class HARDogfoodTestCase(object):
                 reason_type(self.entry["response"]["statusText"]),
                 'Wrong response status reason')
         self.assertEqual(
-            har_failures.exception.args[0]['statusText'].args,
+            har_failures.exception.failures['statusText'].args,
             expected.exception.args,
             'Wrong response status text failure assertion')
 
         self.assertIn(
-            'content/mimeType', har_failures.exception.args[0],
+            'content/mimeType', har_failures.exception.failures,
             'Assertion exception missing MIME type detail')
         # BBB Python 2.7 str vs unicode compat
         ct_type = type(self.get_headers(
@@ -126,12 +126,12 @@ class HARDogfoodTestCase(object):
                 ct_type(self.entry["response"]["content"]["mimeType"]),
                 'Wrong response MIME type')
         self.assertEqual(
-            har_failures.exception.args[0]['content/mimeType'].args,
+            har_failures.exception.failures['content/mimeType'].args,
             expected.exception.args,
             'Wrong response MIME type failure assertion')
 
         self.assertIn(
-            'headers/Allow', har_failures.exception.args[0],
+            'headers/Allow', har_failures.exception.failures,
             'Assertion exception missing wrong header detail')
         # BBB Python 2.7 str vs unicode compat
         header_type = type(self.get_headers(
@@ -142,24 +142,24 @@ class HARDogfoodTestCase(object):
                 header_type(self.entry["response"]["headers"][0]["value"]),
                 "Wrong response header {0!r} value".format('Allow'))
         self.assertEqual(
-            har_failures.exception.args[0]['headers/Allow'].args,
+            har_failures.exception.failures['headers/Allow'].args,
             expected.exception.args,
             'Wrong response header value failure assertion')
 
         self.assertIn(
-            'headers/Corge', har_failures.exception.args[0],
+            'headers/Corge', har_failures.exception.failures,
             'Assertion exception missing absent header detail')
         with self.assertRaises(AssertionError) as expected:
             self.assertIn(
                 'Corge', self.get_headers(har_failures.exception.response),
                 'Missing response header')
         self.assertEqual(
-            har_failures.exception.args[0]['headers/Corge'].args,
+            har_failures.exception.failures['headers/Corge'].args,
             expected.exception.args,
             'Wrong missing response header failure assertion')
 
         self.assertIn(
-            'content/text', har_failures.exception.args[0],
+            'content/text', har_failures.exception.failures,
             'Assertion exception missing wrong content text detail')
         with self.assertRaises(AssertionError) as expected:
             self.assertEqual(
@@ -167,7 +167,7 @@ class HARDogfoodTestCase(object):
                 self.entry["response"]["content"]["text"],
                 'Response content does not match expected')
         self.assertEqual(
-            har_failures.exception.args[0]['content/text'].args,
+            har_failures.exception.failures['content/text'].args,
             expected.exception.args,
             'Wrong response content text failure assertion')
 
@@ -195,19 +195,19 @@ class HARDogfoodTestCase(object):
             self.assertHAR(self.example)
 
         self.assertIn(
-            'content/first_name', har_failures.exception.args[0],
+            'content/first_name', har_failures.exception.failures,
             'Missing failure for missing content key')
         with self.assertRaises(AssertionError) as expected:
             self.assertIn(
                 'first_name', pass_entry["response"]["content"]["text"],
                 'Missing content key')
         self.assertEqual(
-            har_failures.exception.args[0]['content/first_name'].args,
+            har_failures.exception.failures['content/first_name'].args,
             expected.exception.args,
             'Wrong response content missing key failure assertion')
 
         self.assertIn(
-            'content/username', har_failures.exception.args[0],
+            'content/username', har_failures.exception.failures,
             'Missing failure for wrong content value')
         with self.assertRaises(AssertionError) as expected:
             self.assertEqual(
@@ -215,7 +215,7 @@ class HARDogfoodTestCase(object):
                 self.entry["response"]["content"]["text"]["username"],
                 'Wrong content {0!r} value'.format('username'))
         self.assertEqual(
-            har_failures.exception.args[0]['content/username'].args,
+            har_failures.exception.failures['content/username'].args,
             expected.exception.args,
             'Wrong response content wrong value failure assertion')
 

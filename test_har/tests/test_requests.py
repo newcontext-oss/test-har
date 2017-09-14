@@ -76,7 +76,7 @@ class HARDogfoodRequestsTests(tests.HARDogfoodTestCase, test_har.HARTestCase):
             self.assertHAR(self.example)
 
         self.assertIn(
-            'content/mimeType', har_failures.exception.args[0],
+            'content/mimeType', har_failures.exception.failures,
             'Assertion exception missing MIME type detail')
         # BBB Python 2.7 str vs unicode compat
         with self.assertRaises(AssertionError) as expected:
@@ -84,6 +84,6 @@ class HARDogfoodRequestsTests(tests.HARDogfoodTestCase, test_har.HARTestCase):
                 'Content-Type', self.headers,
                 'Missing response content type')
         self.assertEqual(
-            har_failures.exception.args[0]['content/mimeType'].args,
+            har_failures.exception.failures['content/mimeType'].args,
             expected.exception.args,
             'Wrong missing response MIME type failure assertion')

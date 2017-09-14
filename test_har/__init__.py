@@ -27,12 +27,16 @@ class HAREntryAssertionError(AssertionError):
     Collect multiple failures for a single entries response.
     """
 
-    def __init__(self, response, *args):
+    def __init__(self, response, failures, *args):
         """
         Record the response corresponding to the failures.
         """
         self.response = response
-        super(HAREntryAssertionError, self).__init__(*args)
+        self.failures = failures
+        msg = '\n\n\n'.join(
+            'HAR failure at {0!r}:\n\n{1}'.format(path, exc)
+            for path, exc in failures.items())
+        super(HAREntryAssertionError, self).__init__(msg, *args)
 
 
 class HARTestCase(unittest.TestCase):
