@@ -198,7 +198,7 @@ class HARTestCase(unittest.TestCase):
                     try:
                         self.assertEqual(
                             content, expected_content,
-                            'Mismatched response content type')
+                            'Response content does not match expected')
                     except AssertionError as exc:
                         failures['content/text'] = exc
             else:

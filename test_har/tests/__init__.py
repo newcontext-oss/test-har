@@ -165,7 +165,7 @@ class HARDogfoodTestCase(object):
             self.assertEqual(
                 pass_entry["response"]["content"]["text"],
                 self.entry["response"]["content"]["text"],
-                'Mismatched response content type')
+                'Response content does not match expected')
         self.assertEqual(
             har_failures.exception.args[0]['content/text'].args,
             expected.exception.args,
